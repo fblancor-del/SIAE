@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8">
+ <title>Registro de Contactos</title>
+ <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+ <div class="contenedor">
+ <h1>Registro de Contactos</h1>
+ <form action="guardar.php" method="POST" onsubmit="return
+validarFormulario()">
+
+ <label>Nombre:</label>
+ <input type="text" name="nombre" id="nombre">
+ <label>Correo:</label>
+ <input type="email" name="correo" id="correo">
+ <label>Teléfono:</label>
+ <input type="text" name="telefono" id="telefono">
+ <button type="submit">Guardar</button>
+ </form>
+ </div>
+<script>
+function validarFormulario() {
+ let nombre = document.getElementById("nombre").value;
+ let correo = document.getElementById("correo").value;
+ let telefono = document.getElementById("telefono").value;
+ if (nombre == "" || correo == "" || telefono == "") {
+ alert("Todos los campos son obligatorios");
+ return false;
+ }
+ return true;
+}
+</script>
+</body>
+</html>
