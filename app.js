@@ -94,10 +94,10 @@ function showToast(message, type = 'success') {
     };
     
     const icons = {
-        success: 'âœ“',
-        error: 'âœ•',
-        warning: 'âš ',
-        info: 'â„¹'
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
     };
     
     toast.style.cssText = `
@@ -171,7 +171,7 @@ function showPage(page) {
         detenerQRLogin();
     }
     
-    // Cerrar todos los modales al cambiar de pÃ¡gina
+    // Cerrar todos los modales al cambiar de página
     document.querySelectorAll('.modal').forEach(modal => {
         modal.classList.remove('active');
     });
@@ -294,7 +294,7 @@ function refreshStudentProfileUI() {
 
 function openProfileModal() {
     if (!currentStudent) {
-        showToast('Debes iniciar sesion como estudiante', 'error');
+        showToast('Debes iniciar sesión como estudiante', 'error');
         return;
     }
 
@@ -351,7 +351,7 @@ function checkUnlockCode(value) {
     const section = document.getElementById('password-change-section');
 
     section.style.display = unlocked ? 'block' : 'none';
-    status.textContent = unlocked ? 'Codigo correcto. Ya puedes cambiar la contrasena' : 'Ingresa 1156 para desbloquear';
+    status.textContent = unlocked ? 'Código correcto. Ya puedes cambiar la contraseña' : 'Ingresa 1156 para desbloquear';
     status.style.color = unlocked ? '#166534' : '#6b7280';
 }
 
@@ -365,7 +365,7 @@ async function changePassword() {
         return;
     }
     if (!newDate || !confirmDate) {
-        showToast('Completa ambas fechas para actualizar la contrasena', 'error');
+        showToast('Completa ambas fechas para actualizar la contraseña', 'error');
         return;
     }
     if (newDate !== confirmDate) {
@@ -395,9 +395,9 @@ async function changePassword() {
         currentStudent.fecha_nacimiento = newDate;
         document.getElementById('edit-nacimiento').value = newDate;
         refreshStudentProfileUI();
-        showToast('Contrasena actualizada correctamente', 'success');
+        showToast('Contraseña actualizada correctamente', 'success');
     } catch (error) {
-        showToast(error.message || 'No se pudo actualizar la contrasena', 'error');
+        showToast(error.message || 'No se pudo actualizar la contraseña', 'error');
     }
 }
 
@@ -507,14 +507,14 @@ function closeModal(modalId) {
     const form = modal.querySelector('form');
     if (form) {
         form.reset();
-        // Limpiar inputs file especÃ­ficos
+        // Limpiar inputs file específicos
         const fileInputs = form.querySelectorAll('input[type="file"]');
         fileInputs.forEach(input => {
             input.value = '';
         });
     }
     
-    // Resetear estados especÃ­ficos
+    // Resetear estados específicos
     if (modalId === 'teacher-modal') {
         document.querySelector('#teacher-form input[name="id"]').value = '';
         document.getElementById('teacher-modal-title').textContent = 'Agregar Docente';
@@ -965,7 +965,7 @@ async function handleMaterialUploadSubmit(e) {
 // ================= DESCARGAS PDF Y EXCEL =================
 function descargarMisCalificacionesPDF() {
     if (!currentStudent) {
-        showToast('Error: No hay sesion de estudiante activa', 'error');
+        showToast('Error: No hay sesión de estudiante activa', 'error');
         return;
     }
     
@@ -1004,7 +1004,7 @@ function descargarMisCalificacionesPDF() {
 
 function descargarMisCalificacionesXLSX() {
     if (!currentStudent) {
-        showToast('Error: No hay sesion de estudiante activa', 'error');
+        showToast('Error: No hay sesión de estudiante activa', 'error');
         return;
     }
     
@@ -1028,7 +1028,7 @@ function descargarMisCalificacionesXLSX() {
 
 function descargarCedulaPDF() {
     if (!currentStudent) {
-        showToast('No hay sesion activa', 'error');
+        showToast('No hay sesión activa', 'error');
         return;
     }
     
@@ -1055,7 +1055,7 @@ function descargarCedulaPDF() {
 
 function descargarCedulaXLSX() {
     if (!currentStudent) {
-        showToast('No hay sesion activa', 'error');
+        showToast('No hay sesión activa', 'error');
         return;
     }
     
@@ -1365,7 +1365,7 @@ async function handleStudentAppointmentSubmit(e) {
     e.preventDefault();
     
     if (!currentStudent) {
-        showToast('Error: No hay sesion de estudiante activa', 'error');
+        showToast('Error: No hay sesión de estudiante activa', 'error');
         return;
     }
     
@@ -1529,7 +1529,7 @@ function logout() {
     currentHistoryStudent = null;
     detenerQRLogin();
     showPage('home');
-    showToast('Sesion cerrada', 'info');
+    showToast('Sesión cerrada', 'info');
 }
 
 // CARGA DE DATOS
@@ -1731,7 +1731,7 @@ async function loadSpecialties() {
 
 // CRUD OPERATIONS
 async function deleteStudent(id) {
-    if (!confirm('Â¿Estas seguro de eliminar este alumno?')) return;
+    if (!confirm('¿Estas seguro de eliminar este alumno?')) return;
 
     try {
         await apiRequest(`students.php?id=${id}`, {
@@ -1765,7 +1765,7 @@ function editStudent(id) {
 }
 
 async function deleteTeacher(id) {
-    if (!confirm('Â¿Estas seguro de eliminar este docente?')) return;
+    if (!confirm('¿Estas seguro de eliminar este docente?')) return;
 
     try {
         await apiRequest(`teachers.php?id=${id}`, {
@@ -1794,7 +1794,7 @@ function editTeacher(id) {
 }
 
 async function deleteEvent(id) {
-    if (!confirm('Â¿Estas seguro de eliminar este evento?')) return;
+    if (!confirm('¿Estas seguro de eliminar este evento?')) return;
 
     try {
         await apiRequest(`events.php?id=${id}`, {
@@ -1868,7 +1868,7 @@ function setAppointmentEditMode(isEditMode) {
 }
 
 async function deleteAppointment(id) {
-    if (!confirm('Â¿Estas seguro de eliminar esta cita?')) return;
+    if (!confirm('¿Estas seguro de eliminar esta cita?')) return;
 
     try {
         await apiRequest(`appointments.php?id=${id}`, {
@@ -1884,7 +1884,7 @@ async function deleteAppointment(id) {
 }
 
 async function deleteSpecialty(id) {
-    if (!confirm('Â¿Estas seguro de eliminar esta especialidad?')) return;
+    if (!confirm('¿Estas seguro de eliminar esta especialidad?')) return;
 
     try {
         await apiRequest(`specialties.php?id=${id}`, {
@@ -2197,6 +2197,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('SIEA Demo cargado exitosamente');
     console.log('Datos de demo disponibles:', demoData);
     console.log('Credenciales de prueba:');
-    console.log('   Admin: cualquier usuario/contraseÃ±a');
+    console.log('   Admin: Admin123 / 1234');
     console.log('   Estudiante: 2024001 / 2005-03-15');
 });

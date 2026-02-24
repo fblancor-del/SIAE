@@ -15,11 +15,10 @@
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
-    <base target="_blank">
 </head>
 <body>
 
-<!-- PÃGINA DE INICIO -->
+<!-- PÁGINA DE INICIO -->
 <div id="home-page">
     <div class="logo-container" onclick="document.getElementById('logo-upload-home').click()" style="cursor: pointer;">
         <img src="/SIAE/imagenes/dgeti.png" class="imagen-fija" alt="Mi imagen" onerror="this.onerror=null; this.src='imagenes/dgeti.png';">
@@ -59,7 +58,7 @@
                     <label>Contraseña</label>
                     <input type="password" name="password" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Iniciar Sesion</button>
+                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
             </form>
             <a href="#" class="back-link" onclick="showPage('home'); return false;">Volver al inicio</a>
         </div>
@@ -99,7 +98,7 @@
                     <label>Fecha de Nacimiento</label>
                     <input type="date" name="fecha_nacimiento" id="login-fn" required>
                 </div>
-                <button type="submit" class="btn btn-secondary" style="width: 100%;">Iniciar Sesion</button>
+                <button type="submit" class="btn btn-secondary" style="width: 100%;">Iniciar Sesión</button>
             </form>
             <a href="#" class="back-link" onclick="showPage('home'); return false;">Volver al inicio</a>
         </div>
@@ -116,7 +115,7 @@
         </div>
         <div class="user-info">
             <span id="admin-name">Administrador</span>
-            <button class="btn-logout" onclick="logout()">Cerrar Sesion</button>
+            <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
         </div>
     </div>
     <div class="dashboard-content">
@@ -134,7 +133,7 @@
         </aside>
         <main class="main-content">
             
-            <!-- MÃ³dulo Resumen -->
+            <!-- Módulo Resumen -->
             <section id="module-overview" class="module-section active">
                 <h2>Resumen General</h2>
                 <div class="stats-grid">
@@ -157,7 +156,7 @@
                 </div>
             </section>
             
-            <!-- MÃ³dulo Alumnos -->
+            <!-- Módulo Alumnos -->
             <section id="module-students" class="module-section">
                 <div class="module-header">
                     <h2>Gestion de Alumnos</h2>
@@ -180,7 +179,7 @@
                 </div>
             </section>
             
-            <!-- MÃ³dulo Docentes -->
+            <!-- Módulo Docentes -->
             <section id="module-teachers" class="module-section">
                 <div class="module-header">
                     <h2>Gestion de Docentes</h2>
@@ -202,7 +201,7 @@
                 </div>
             </section>
             
-            <!-- MÃ³dulo Calificaciones CON EXCEL -->
+            <!-- Módulo Calificaciones CON EXCEL -->
             <section id="module-grades" class="module-section">
                 <div class="module-header">
                     <h2>Gestion de Calificaciones</h2>
@@ -258,7 +257,7 @@
                 </div>
             </section>
             
-            <!-- MÃ³dulo Eventos -->
+            <!-- Módulo Eventos -->
             <section id="module-events" class="module-section">
                 <div class="module-header">
                     <h2>Gestion de Eventos</h2>
@@ -282,7 +281,7 @@
                 </div>
             </section>
             
-            <!-- MÃ³dulo Citas -->
+            <!-- Módulo Citas -->
             <section id="module-appointments" class="module-section">
                 <div class="module-header">
                     <h2>Gestion de Citas</h2>
@@ -305,7 +304,7 @@
                 </div>
             </section>
             
-            <!-- MÃ³dulo Especialidades -->
+            <!-- Módulo Especialidades -->
             <section id="module-specialties" class="module-section">
                 <div class="module-header">
                     <h2>Gestion de Especialidades</h2>
@@ -330,7 +329,7 @@
                 </div>
             </section>
             
-            <!-- MÃ³dulo Historial AcadÃ©mico NUEVO -->
+            <!-- Módulo Historial Académico NUEVO -->
             <section id="module-academic-history" class="module-section">
                 <div class="module-header">
                     <h2>Historial Academico</h2>
@@ -372,7 +371,7 @@
         </div>
         <div class="user-info">
             <span id="student-name">Estudiante</span>
-            <button class="btn-logout" onclick="logout()">Cerrar Sesion</button>
+            <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
         </div>
     </div>
     <div class="dashboard-content">
@@ -575,8 +574,8 @@
                 </div>
 
                 <div class="form-section">
-                    <h3>Cambiar contrasena de acceso</h3>
-                    <p class="hint-text">Para cambiar tu contrasena, ingresa el codigo de desbloqueo proporcionado por administracion.</p>
+                    <h3>Cambiar contraseña de acceso</h3>
+                    <p class="hint-text">Para cambiar tu contraseña, ingresa el código de desbloqueo proporcionado por administración.</p>
 
                     <div class="unlock-section">
                         <div class="form-group">
@@ -595,7 +594,7 @@
                             <label>Confirmar nueva fecha</label>
                             <input type="date" id="confirm-password-date">
                         </div>
-                        <button type="button" class="btn btn-secondary" onclick="changePassword()">Actualizar contrasena</button>
+                        <button type="button" class="btn btn-secondary" onclick="changePassword()">Actualizar contraseña</button>
                     </div>
                 </div>
 
