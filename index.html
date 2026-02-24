@@ -1,36 +1,1009 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
- <meta charset="UTF-8">
- <title>Registro de Contactos</title>
- <link rel="stylesheet" href="estilos.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIEA - Sistema Integral para Estudiantes y Administradores</title>
+    
+    <!-- CSS EXTERNO -->
+    <link rel="stylesheet" href="estilos.css">
+    
+    <!-- LIBRERIAS QR Y EXCEL -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <base target="_blank">
 </head>
 <body>
- <div class="contenedor">
- <h1>Registro de Contactos</h1>
- <form action="guardar.php" method="POST" onsubmit="return
-validarFormulario()">
 
- <label>Nombre:</label>
- <input type="text" name="nombre" id="nombre">
- <label>Correo:</label>
- <input type="email" name="correo" id="correo">
- <label>Teléfono:</label>
- <input type="text" name="telefono" id="telefono">
- <button type="submit">Guardar</button>
- </form>
- </div>
-<script>
-function validarFormulario() {
- let nombre = document.getElementById("nombre").value;
- let correo = document.getElementById("correo").value;
- let telefono = document.getElementById("telefono").value;
- if (nombre == "" || correo == "" || telefono == "") {
- alert("Todos los campos son obligatorios");
- return false;
- }
- return true;
-}
-</script>
+<!-- PÃGINA DE INICIO -->
+<div id="home-page">
+    <div class="logo-container" onclick="document.getElementById('logo-upload-home').click()" style="cursor: pointer;">
+        <img src="/SIAE/imagenes/dgeti.png" class="imagen-fija" alt="Mi imagen" onerror="this.onerror=null; this.src='imagenes/dgeti.png';">
+    </div>
+    <div class="home-content">
+        <h1>SIEA</h1>
+        <p class="role-question">Sistema Integral para Estudiantes y Administradores</p>
+        <div class="role-cards">
+            <div class="role-card" onclick="showPage('admin-login')">
+                <div class="role-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <h2>Administrador</h2>
+            </div>
+            <div class="role-card" onclick="showPage('student-login')">
+                <div class="role-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>
+                </div>
+                <h2>Estudiante</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LOGIN ADMINISTRADOR - SIN QR -->
+<div id="admin-login" class="login-page">
+        <div class="login-container" style="max-width: 500px; grid-template-columns: 1fr;">
+            <div class="form-section" style="border-radius: 16px;">
+            <h2 class="login-title">Administrador</h2>
+            <p style="text-align: center; margin-bottom: 2rem; color: #666;">Ingresa tus credenciales</p>
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" name="usuario" required>
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Iniciar Sesion</button>
+            </form>
+            <a href="#" class="back-link" onclick="showPage('home'); return false;">Volver al inicio</a>
+        </div>
+    </div>
+</div>
+
+<!-- LOGIN ESTUDIANTE CON QR -->
+<div id="student-login" class="login-page">
+    <div class="login-container">
+        <div class="qr-section">
+            <div class="logo-dgeti" id="logo-student-login" style="margin-bottom: 1rem;">DGETI</div>
+            <img src="/SIAE/imagenes/dgeti.png" class="imagen-fija" alt="Mi imagen" onerror="this.onerror=null; this.src='imagenes/dgeti.png';">
+            
+            <div class="qr-placeholder" id="qr-student-placeholder">
+                <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+            </div>
+            <div id="qr-reader-container-student" style="display:none;">
+                <div id="reader-student" style="width: 250px; height: 250px;"></div>
+            </div>
+            <button type="button" class="btn btn-scan" onclick="iniciarQRLogin()">Escanear QR</button>
+            <button type="button" class="btn btn-delete" onclick="detenerQRLogin()" style="display:none; margin-top: 0.5rem;" id="btn-cancel-qr">Cancelar</button>
+            <p style="margin-top: 1rem;">O ingresa tus datos manualmente</p>
+        </div>
+        <div class="form-section">
+            <h2 class="login-title">Estudiante</h2>
+            <form id="student-login-form">
+                <div class="form-group">
+                    <label>Numero de Control</label>
+                    <input type="text" name="numero_control" id="login-nc" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Nacimiento</label>
+                    <input type="date" name="fecha_nacimiento" id="login-fn" required>
+                </div>
+                <button type="submit" class="btn btn-secondary" style="width: 100%;">Iniciar Sesion</button>
+            </form>
+            <a href="#" class="back-link" onclick="showPage('home'); return false;">Volver al inicio</a>
+        </div>
+    </div>
+</div>
+
+<!-- DASHBOARD ADMINISTRADOR -->
+<div id="admin-dashboard" class="dashboard">
+    <div class="dashboard-header">
+        <div class="header-left">
+            <img src="/SIAE/imagenes/dgeti.png" class="imagen-fija" alt="Mi imagen" onerror="this.onerror=null; this.src='imagenes/dgeti.png';">
+            <input type="file" id="logo-upload-dash" accept="image/*" style="display: none;" onchange="updateLogo(this, 'admin-dash')">
+            <h1>Panel de Administracion - SIEA</h1>
+        </div>
+        <div class="user-info">
+            <span id="admin-name">Administrador</span>
+            <button class="btn-logout" onclick="logout()">Cerrar Sesion</button>
+        </div>
+    </div>
+    <div class="dashboard-content">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="#" class="active" onclick="showModule('overview'); return false;">Resumen</a></li>
+                <li><a href="#" onclick="showModule('students'); return false;">Alumnos</a></li>
+                <li><a href="#" onclick="showModule('teachers'); return false;">Docentes</a></li>
+                <li><a href="#" onclick="showModule('grades'); return false;">Calificaciones</a></li>
+                <li><a href="#" onclick="showModule('events'); return false;">Eventos</a></li>
+                <li><a href="#" onclick="showModule('appointments'); return false;">Citas</a></li>
+                <li><a href="#" onclick="showModule('specialties'); return false;">Especialidades</a></li>
+                <li><a href="#" onclick="showModule('academic-history'); return false;">Historial Academico</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            
+            <!-- MÃ³dulo Resumen -->
+            <section id="module-overview" class="module-section active">
+                <h2>Resumen General</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="stat-students">0</h3>
+                        <p>Alumnos Activos</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="stat-teachers">0</h3>
+                        <p>Docentes</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="stat-events">0</h3>
+                        <p>Eventos Proximos</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="stat-appointments">0</h3>
+                        <p>Citas Pendientes</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- MÃ³dulo Alumnos -->
+            <section id="module-students" class="module-section">
+                <div class="module-header">
+                    <h2>Gestion de Alumnos</h2>
+                    <button class="btn btn-primary" onclick="openModal('student-modal')">+ Agregar Alumno</button>
+                </div>
+                <div class="card">
+                    <table id="students-table">
+                        <thead>
+                            <tr>
+                                <th>No. Control</th>
+                                <th>Nombre</th>
+                                <th>Especialidad</th>
+                                <th>Seccion</th>
+                                <th>Semestre</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- MÃ³dulo Docentes -->
+            <section id="module-teachers" class="module-section">
+                <div class="module-header">
+                    <h2>Gestion de Docentes</h2>
+                    <button class="btn btn-primary" onclick="openModal('teacher-modal')">+ Agregar Docente</button>
+                </div>
+                <div class="card">
+                    <table id="teachers-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Especialidad</th>
+                                <th>Email</th>
+                                <th>Telefono</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- MÃ³dulo Calificaciones CON EXCEL -->
+            <section id="module-grades" class="module-section">
+                <div class="module-header">
+                    <h2>Gestion de Calificaciones</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-excel" onclick="toggleExcelSection()">
+                            Cargar Excel
+                        </button>
+                        <button class="btn btn-primary" onclick="openModal('grade-modal')">+ Correccion Manual</button>
+                    </div>
+                </div>
+                
+                <div id="excel-section" class="excel-upload-section" style="display:none;">
+                    <h3>Cargar Calificaciones desde Excel</h3>
+                    <div class="excel-grid">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Seleccionar Materia</label>
+                            <select id="excel-materia-select">
+                                <option value="">Seleccionar materia...</option>
+                                <option value="1">Matematicas</option>
+                                <option value="2">Historia</option>
+                                <option value="3">Programacion</option>
+                                <option value="4">Fisica</option>
+                                <option value="5">Quimica</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Archivo Excel</label>
+                            <input type="file" id="excelFile" accept=".xlsx,.xls" style="padding: 8px;">
+                        </div>
+                        <button class="btn btn-excel" onclick="subirExcel()" style="height: fit-content;">
+                            Subir Excel
+                        </button>
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #166534;">
+                        <strong>Formato esperado:</strong> Columnas: numero_control, nombre, calificacion
+                    </p>
+                </div>
+                
+                <div class="card">
+                    <table id="grades-table">
+                        <thead>
+                            <tr>
+                                <th>Alumno</th>
+                                <th>No. Control</th>
+                                <th>Materia</th>
+                                <th>Calificacion</th>
+                                <th>Semestre</th>
+                                <th>Parcial</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- MÃ³dulo Eventos -->
+            <section id="module-events" class="module-section">
+                <div class="module-header">
+                    <h2>Gestion de Eventos</h2>
+                    <button class="btn btn-primary" onclick="openModal('event-modal')">+ Crear Evento</button>
+                </div>
+                <div class="card">
+                    <table id="events-table">
+                        <thead>
+                            <tr>
+                                <th>Flyer</th>
+                                <th>Titulo</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Lugar</th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- MÃ³dulo Citas -->
+            <section id="module-appointments" class="module-section">
+                <div class="module-header">
+                    <h2>Gestion de Citas</h2>
+                    <button class="btn btn-primary" onclick="openModal('appointment-modal')">+ Agregar Cita</button>
+                </div>
+                <div class="card">
+                    <table id="appointments-table">
+                        <thead>
+                            <tr>
+                                <th>Alumno</th>
+                                <th>Docente</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- MÃ³dulo Especialidades -->
+            <section id="module-specialties" class="module-section">
+                <div class="module-header">
+                    <h2>Gestion de Especialidades</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary" onclick="openAddSpecialtyModal()">+ Agregar Especialidad</button>
+                        <button class="btn btn-secondary" onclick="openUploadMaterialModal()">Subir Material</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <table id="specialties-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripcion</th>
+                                <th>Cuadernillos</th>
+                                <th>Formatos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- MÃ³dulo Historial AcadÃ©mico NUEVO -->
+            <section id="module-academic-history" class="module-section">
+                <div class="module-header">
+                    <h2>Historial Academico</h2>
+                </div>
+                <div class="card">
+                    <div class="form-group history-search-group">
+                        <div class="history-search-field">
+                            <label>Numero de Control del Alumno</label>
+                            <input type="text" id="history-search-input" placeholder="Ingrese numero de control...">
+                        </div>
+                        <button class="btn btn-primary history-search-btn" onclick="buscarHistorialAcademico()">Buscar</button>
+                    </div>
+                </div>
+                <div id="history-result" style="display:none; margin-top: 2rem;">
+                    <div class="card" id="history-card">
+                        <div style="text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #eee; padding-bottom: 1rem;">
+                            <h3 style="color: var(--color-primary); margin-bottom: 0.5rem;">CONSTANCIA DE ESTUDIOS</h3>
+                            <p style="color: #666;">SIEA - Sistema Integral para Estudiantes y Administradores</p>
+                        </div>
+                        <div id="history-content">
+                            <!-- Se llena dinamicamente -->
+                        </div>
+                        <div style="margin-top: 2rem; text-align: center;">
+                            <button class="btn btn-primary" onclick="descargarConstanciaPDF()">Descargar PDF</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<!-- DASHBOARD ESTUDIANTE -->
+<div id="student-dashboard" class="dashboard">
+    <div class="dashboard-header">
+        <div class="header-left">
+                        <img src="/SIAE/imagenes/dgeti.png" class="imagen-fija" alt="Mi imagen" onerror="this.onerror=null; this.src='imagenes/dgeti.png';">
+            <h1>Portal del Estudiante - SIEA</h1>
+        </div>
+        <div class="user-info">
+            <span id="student-name">Estudiante</span>
+            <button class="btn-logout" onclick="logout()">Cerrar Sesion</button>
+        </div>
+    </div>
+    <div class="dashboard-content">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="#" class="active" onclick="showModuleStudent('student-overview'); return false;">Mi Perfil</a></li>
+                <li><a href="#" onclick="showModuleStudent('student-grades'); return false;">Mis Calificaciones</a></li>
+                <li><a href="#" onclick="showModuleStudent('student-specialty'); return false;">Especialidad</a></li>
+                <li><a href="#" onclick="showModuleStudent('student-events'); return false;">Eventos</a></li>
+                <li><a href="#" onclick="showModuleStudent('student-appointments'); return false;">Mis Citas</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            
+            <section id="module-student-overview" class="module-section active">
+                <h2>Mi Perfil</h2>
+                <div class="card" id="student-profile-card">
+                    <div class="student-profile-header">
+                        <img id="student-profile-photo" class="student-profile-photo" alt="Foto de perfil">
+                        <button class="btn btn-primary" type="button" onclick="openProfileModal()">Editar perfil</button>
+                    </div>
+                    <h3>Informacion Personal</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                        <p><strong>Nombre:</strong> <span id="student-info-name"></span></p>
+                        <p><strong>Numero de Control:</strong> <span id="student-info-control"></span></p>
+                        <p><strong>Especialidad:</strong> <span id="student-info-specialty"></span></p>
+                        <p><strong>Semestre:</strong> <span id="student-info-semester"></span></p>
+                        <p><strong>Email:</strong> <span id="student-info-email"></span></p>
+                        <p><strong>Telefono:</strong> <span id="student-info-phone"></span></p>
+                        <p><strong>Fecha de Nacimiento:</strong> <span id="student-info-birth"></span></p>
+                        <p><strong>Seccion:</strong> <span id="student-info-section"></span></p>
+                        <p><strong>Direccion:</strong> <span id="student-info-address"></span></p>
+                        <p><strong>Emergencia:</strong> <span id="student-info-emergency-name"></span></p>
+                        <p><strong>Tel. Emergencia:</strong> <span id="student-info-emergency-phone"></span></p>
+                    </div>
+                    <div style="margin-top: 2rem; text-align: center;">
+                        <button class="btn btn-primary" onclick="descargarCedulaPDF()">Descargar Cedula PDF</button>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="module-student-grades" class="module-section">
+                <div class="module-header">
+                    <h2>Mis Calificaciones</h2>
+                    <div>
+                        <button class="btn btn-primary" onclick="descargarMisCalificacionesPDF()">Descargar PDF</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div id="student-academic-progress"></div>
+                    <table id="student-grades-table">
+                        <thead>
+                            <tr>
+                                <th>Materia</th>
+                                <th>Docente</th>
+                                <th>Calificacion</th>
+                                <th>Semestre</th>
+                                <th>Parcial</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="module-student-specialty" class="module-section">
+                <h2>Recursos de Especialidad</h2>
+                <div class="card">
+                    <p style="margin-bottom: 0.5rem;"><strong>Especialidad:</strong> <span id="student-specialty-name">No asignada</span></p>
+                    <p id="student-specialty-description" style="margin-bottom: 1rem; color: #4b5563;">Sin descripcion disponible.</p>
+                    <div class="form-row" style="margin-bottom: 0;">
+                        <div>
+                            <h3 style="margin-bottom: 0.75rem;">Libros / Cuadernillos</h3>
+                            <div id="student-specialty-books"></div>
+                        </div>
+                        <div>
+                            <h3 style="margin-bottom: 0.75rem;">Formatos</h3>
+                            <div id="student-specialty-formats"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="module-student-events" class="module-section">
+                <h2>Eventos</h2>
+                <div id="student-events-container" class="events-grid">
+                    <!-- Se llenan dinamicamente con cards de eventos incluyendo flyers -->
+                </div>
+            </section>
+            
+            <section id="module-student-appointments" class="module-section">
+                <div class="module-header">
+                    <h2>Mis Citas</h2>
+                    <button class="btn btn-primary" onclick="openModal('student-appointment-modal')">+ Agendar Cita</button>
+                </div>
+                <div class="card">
+                    <table id="student-appointments-table">
+                        <thead>
+                            <tr>
+                                <th>Docente</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+            <button class="fab-edit-profile" onclick="openProfileModal()" title="Editar perfil">Editar</button>
+        </main>
+    </div>
+</div>
+
+<!-- MODAL EDITAR PERFIL ESTUDIANTE -->
+<div id="profile-edit-modal" class="modal" onclick="closeModalOnBackground(event, 'profile-edit-modal')">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content profile-modal">
+            <div class="modal-header">
+                <h3>Editar Perfil</h3>
+                <button class="close-modal" onclick="closeProfileModal()" type="button">&times;</button>
+            </div>
+
+            <form id="profile-form" onsubmit="saveProfile(event)">
+                <div class="photo-section">
+                    <div class="photo-container">
+                        <img id="profile-preview" alt="Foto de perfil">
+                        <div class="photo-overlay" onclick="document.getElementById('photo-input').click()">
+                            <span>Cambiar</span>
+                        </div>
+                    </div>
+                    <input type="file" id="photo-input" accept="image/*" capture="user" onchange="previewPhoto(this)" hidden>
+                    <button type="button" class="btn btn-secondary btn-photo" onclick="takePhoto()">Tomar foto</button>
+                    <p class="photo-hint">Toca la imagen para subir foto</p>
+                </div>
+
+                <div class="form-section">
+                    <h3>Informacion personal</h3>
+
+                    <div class="form-group">
+                        <label>Nombre completo *</label>
+                        <input type="text" id="edit-nombre" required placeholder="Tu nombre completo">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Numero de control</label>
+                            <input type="text" id="edit-control" disabled class="disabled-field">
+                            <small>No editable</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Fecha de nacimiento</label>
+                            <input type="date" id="edit-nacimiento" disabled class="disabled-field">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Especialidad</label>
+                            <input type="text" id="edit-especialidad" disabled class="disabled-field">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Semestre actual</label>
+                            <input type="number" id="edit-semestre" min="1" max="12">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Informacion de contacto</h3>
+
+                    <div class="form-group">
+                        <label>Correo electronico *</label>
+                        <input type="email" id="edit-email" required placeholder="tu@email.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Telefono celular</label>
+                        <input type="tel" id="edit-telefono" placeholder="555-123-4567">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Direccion completa</label>
+                        <textarea id="edit-direccion" rows="2" placeholder="Calle, numero, colonia, ciudad"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Contacto de emergencia</label>
+                            <input type="text" id="edit-emergencia-nombre" placeholder="Nombre del contacto">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefono emergencia</label>
+                            <input type="tel" id="edit-emergencia-tel" placeholder="555-987-6543">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Cambiar contrasena de acceso</h3>
+                    <p class="hint-text">Para cambiar tu contrasena, ingresa el codigo de desbloqueo proporcionado por administracion.</p>
+
+                    <div class="unlock-section">
+                        <div class="form-group">
+                            <label>Codigo de desbloqueo</label>
+                            <input type="password" id="unlock-code" placeholder="Ingresa codigo" oninput="checkUnlockCode(this.value)">
+                            <small id="unlock-status">Ingresa 1156 para desbloquear</small>
+                        </div>
+                    </div>
+
+                    <div id="password-change-section" class="password-section" style="display:none;">
+                        <div class="form-group">
+                            <label>Nueva fecha de acceso (YYYY-MM-DD)</label>
+                            <input type="date" id="new-password-date">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirmar nueva fecha</label>
+                            <input type="date" id="confirm-password-date">
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="changePassword()">Actualizar contrasena</button>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeProfileModal()" style="margin-right: 0.5rem;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+<!-- MODAL ALUMNO CON GENERADOR QR -->
+<div id="student-modal" class="modal" onclick="closeModalOnBackground(event, 'student-modal')">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="student-modal-title">Agregar Alumno</h3>
+                <button class="close-modal" onclick="closeModal('student-modal')" type="button">&times;</button>
+            </div>
+            <form id="student-form" onsubmit="handleStudentSubmit(event)">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Numero de Control *</label>
+                    <input type="text" name="numero_control" id="student-nc" required>
+                </div>
+                <div class="form-group">
+                    <label>Nombre Completo *</label>
+                    <input type="text" name="nombre_completo" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Nacimiento *</label>
+                    <input type="date" name="fecha_nacimiento" id="student-fn" required>
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" class="btn btn-qr" onclick="generarQRAlumno()" style="width: 100%;">
+                        Generar QR de Acceso para Alumno
+                    </button>
+                </div>
+                
+                <div id="qr-container" class="qr-container" style="display:none;">
+                    <p><strong>QR de Acceso Generado:</strong></p>
+                    <canvas id="qrCanvas"></canvas>
+                    <p style="font-size: 0.8rem; color: #374151; margin-top: 0.5rem;">
+                        Este QR contiene el numero de control y fecha de nacimiento para login rapido.
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email">
+                </div>
+                <div class="form-group">
+                    <label>Telefono</label>
+                    <input type="tel" name="telefono">
+                </div>
+                <div class="form-group">
+                    <label>Direccion</label>
+                    <input type="text" name="direccion">
+                </div>
+                <div class="form-group">
+                    <label>Seccion</label>
+                    <select name="seccion">
+                        <option value="">Seleccionar...</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Especialidad</label>
+                    <select name="especialidad_id">
+                        <option value="">Seleccionar...</option>
+                        <option value="1">Programacion</option>
+                        <option value="2">Contabilidad</option>
+                        <option value="3">Electronica</option>
+                        <option value="4">Mecanica</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Semestre *</label>
+                    <input type="number" name="semestre_actual" min="1" max="6" value="1" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('student-modal')" style="margin-right: 0.5rem;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DOCENTE -->
+<div id="teacher-modal" class="modal" onclick="closeModalOnBackground(event, 'teacher-modal')">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="teacher-modal-title">Agregar Docente</h3>
+                <button class="close-modal" onclick="closeModal('teacher-modal')" type="button">&times;</button>
+            </div>
+            <form id="teacher-form" onsubmit="handleTeacherSubmit(event)">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Nombre Completo *</label>
+                    <input type="text" name="nombre_completo" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email">
+                </div>
+                <div class="form-group">
+                    <label>Telefono</label>
+                    <input type="tel" name="telefono">
+                </div>
+                <div class="form-group">
+                    <label>Especialidad</label>
+                    <input type="text" name="especialidad">
+                </div>
+                <div class="form-group">
+                    <label>Horario de Disponibilidad</label>
+                    <textarea name="horario_disponibilidad" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('teacher-modal')" style="margin-right: 0.5rem;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CORRECCION MANUAL (antes Registrar Calificacion) -->
+<div id="grade-modal" class="modal" onclick="closeModalOnBackground(event, 'grade-modal')">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Correccion Manual</h3>
+                <button class="close-modal" onclick="closeModal('grade-modal')" type="button">&times;</button>
+            </div>
+            <form id="grade-form" onsubmit="handleGradeSubmit(event)">
+                <div class="form-group">
+                    <label>Alumno *</label>
+                    <select name="alumno_id" required id="grade-student-select">
+                        <option value="">Seleccionar alumno...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Materia *</label>
+                    <select name="materia_id" required id="grade-subject-select">
+                        <option value="">Seleccionar materia...</option>
+                        <option value="1">Matematicas</option>
+                        <option value="2">Historia</option>
+                        <option value="3">Programacion</option>
+                        <option value="4">Fisica</option>
+                        <option value="5">Quimica</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Docente</label>
+                    <select name="docente_id" id="grade-teacher-select">
+                        <option value="">Seleccionar docente...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Calificacion *</label>
+                    <input type="number" name="calificacion" min="0" max="10" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label>Semestre *</label>
+                    <select name="semestre" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Parcial *</label>
+                    <select name="parcial" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('grade-modal')" style="margin-right: 0.5rem;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EVENTO CON FLYER -->
+<div id="event-modal" class="modal" onclick="closeModalOnBackground(event, 'event-modal')">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="event-modal-title">Crear Evento</h3>
+                <button class="close-modal" onclick="closeModal('event-modal')" type="button">&times;</button>
+            </div>
+            <form id="event-form" onsubmit="handleEventSubmit(event)">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Titulo *</label>
+                    <input type="text" name="titulo" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripcion</label>
+                    <textarea name="descripcion" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Fecha *</label>
+                    <input type="date" name="fecha_evento" required>
+                </div>
+                <div class="form-group">
+                    <label>Hora</label>
+                    <input type="time" name="hora_evento">
+                </div>
+                <div class="form-group">
+                    <label>Lugar</label>
+                    <input type="text" name="lugar">
+                </div>
+                <div class="form-group">
+                    <label>Tipo *</label>
+                    <select name="tipo" required>
+                        <option value="academico">Academico</option>
+                        <option value="cultural">Cultural</option>
+                        <option value="deportivo">Deportivo</option>
+                        <option value="social">Social</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Flyer (Imagen)</label>
+                    <input type="file" id="event-flyer" accept="image/*" onchange="previewFlyer(this)">
+                    <div id="flyer-preview" style="margin-top: 1rem; display: none;">
+                        <img id="flyer-img-preview" style="max-width: 100%; max-height: 200px; border-radius: 8px;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('event-modal')" style="margin-right: 0.5rem;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL AGREGAR/EDITAR ESPECIALIDAD -->
+<div id="specialty-modal" class="modal" onclick="closeModalOnBackground(event, 'specialty-modal')">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="specialty-modal-title">Agregar Especialidad</h3>
+                <button class="close-modal" onclick="closeModal('specialty-modal')" type="button">&times;</button>
+            </div>
+            <form id="specialty-form" onsubmit="handleSpecialtySubmit(event)">
+                <input type="hidden" name="id" id="specialty-id">
+                <div class="form-group">
+                    <label>Nombre *</label>
+                    <input type="text" name="nombre" id="specialty-nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripcion</label>
+                    <textarea name="descripcion" id="specialty-descripcion" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('specialty-modal')" style="margin-right: 0.5rem;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SUBIR MATERIAL -->
+<div id="material-upload-modal" class="modal" onclick="closeModalOnBackground(event, 'material-upload-modal')">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Subir Material</h3>
+                <button class="close-modal" onclick="closeModal('material-upload-modal')" type="button">&times;</button>
+            </div>
+            <form id="material-upload-form" onsubmit="handleMaterialUploadSubmit(event)">
+                <div class="form-group">
+                    <label>Materia / Especialidad *</label>
+                    <select id="material-specialty-select" required>
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cuadernillos (PDF)</label>
+                    <input type="file" id="material-cuadernillos-input" accept=".pdf" multiple onchange="handleCuadernillosSelect(this)">
+                    <div id="material-cuadernillos-list" style="margin-top: 1rem;"></div>
+                </div>
+                <div class="form-group">
+                    <label>Formatos (PDF/Excel)</label>
+                    <input type="file" id="material-formatos-input" accept=".pdf,.xlsx,.xls" multiple onchange="handleFormatosSelect(this)">
+                    <div id="material-formatos-list" style="margin-top: 1rem;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('material-upload-modal')" style="margin-right: 0.5rem;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Material</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- MODAL CITA ESTUDIANTE -->
+<div id="student-appointment-modal" class="modal" onclick="closeModalOnBackground(event, 'student-appointment-modal')">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Agendar Cita</h3>
+                <button class="close-modal" onclick="closeModal('student-appointment-modal')" type="button">&times;</button>
+            </div>
+            <form id="student-appointment-form" onsubmit="handleStudentAppointmentSubmit(event)">
+                <div class="form-group">
+                    <label>Docente *</label>
+                    <select name="docente_id" required id="appointment-teacher-select">
+                        <option value="">Seleccionar docente...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha *</label>
+                    <input type="date" name="fecha_cita" required>
+                </div>
+                <div class="form-group">
+                    <label>Hora *</label>
+                    <input type="time" name="hora_cita" required>
+                </div>
+                <div class="form-group">
+                    <label>Motivo</label>
+                    <textarea name="motivo" rows="3" placeholder="Describe brevemente el motivo de tu cita..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('student-appointment-modal')" style="margin-right: 0.5rem;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Agendar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CITA ADMINISTRADOR -->
+<div id="appointment-modal" class="modal" onclick="closeModalOnBackground(event, 'appointment-modal')">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="appointment-modal-title">Agendar Cita</h3>
+                <button class="close-modal" onclick="closeModal('appointment-modal')" type="button">&times;</button>
+            </div>
+            <form id="appointment-form" onsubmit="handleAppointmentSubmit(event)">
+                <input type="hidden" name="id" id="appointment-id">
+                <div class="form-group" id="group-appointment-student">
+                    <label>Alumno *</label>
+                    <select name="alumno_id" required id="appointment-student-select">
+                        <option value="">Seleccionar alumno...</option>
+                    </select>
+                </div>
+                <div class="form-group" id="group-appointment-teacher">
+                    <label>Docente *</label>
+                    <select name="docente_id" required id="appointment-teacher-select-admin">
+                        <option value="">Seleccionar docente...</option>
+                    </select>
+                </div>
+                <div class="form-group" id="group-appointment-date">
+                    <label>Fecha *</label>
+                    <input type="date" name="fecha_cita" required>
+                </div>
+                <div class="form-group" id="group-appointment-time">
+                    <label>Hora *</label>
+                    <input type="time" name="hora_cita" required>
+                </div>
+                <div class="form-group" id="group-appointment-reason">
+                    <label>Motivo</label>
+                    <textarea name="motivo" rows="3" placeholder="Describe brevemente el motivo de la cita..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Estado *</label>
+                    <select name="estado" id="appointment-status-select" required>
+                        <option value="espera">En espera</option>
+                        <option value="aceptado">Aceptado</option>
+                        <option value="rechazado">Rechazado</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('appointment-modal')" style="margin-right: 0.5rem;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="appointment-submit-btn">Agendar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JAVASCRIPT EXTERNO -->
+<script src="app.js?v=20260224"></script>
+
 </body>
 </html>
