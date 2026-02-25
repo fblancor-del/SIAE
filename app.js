@@ -81,10 +81,67 @@ async function apiRequest(endpoint, options = {}) {
     return payload;
 }
 
+function setFormLoadingState(form, isLoading, loadingText = 'Guardando...') {
+    if (!form) return;
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (!submitButton) return;
+
+    if (!submitButton.dataset.originalText) {
+        submitButton.dataset.originalText = submitButton.textContent;
+    }
+
+    submitButton.disabled = isLoading;
+    submitButton.classList.toggle('is-loading', isLoading);
+    submitButton.textContent = isLoading ? loadingText : submitButton.dataset.originalText;
+}
+
+function animateCount(element, targetValue, duration = 550) {
+    if (!element) return;
+
+    const parsedTarget = Number(targetValue) || 0;
+    const startValue = Number(element.textContent) || 0;
+
+    if (startValue === parsedTarget) {
+        element.textContent = String(parsedTarget);
+        return;
+    }
+
+    const startTime = performance.now();
+
+    function step(currentTime) {
+        const elapsed = Math.min((currentTime - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - elapsed, 3);
+        const nextValue = Math.round(startValue + (parsedTarget - startValue) * eased);
+        element.textContent = String(nextValue);
+
+        if (elapsed < 1) {
+            requestAnimationFrame(step);
+        }
+    }
+
+    requestAnimationFrame(step);
+}
+
+function renderTableSkeleton(tbody, columnCount, rows = 4) {
+    if (!tbody) return;
+
+    const skeletonRows = Array.from({ length: rows }, () => {
+        const cells = Array.from({ length: columnCount }, () => '<td><div class="table-skeleton-line"></div></td>').join('');
+        return `<tr class="table-skeleton-row">${cells}</tr>`;
+    }).join('');
+
+    tbody.innerHTML = skeletonRows;
+}
+
 // SISTEMA DE TOASTS
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
+    if (!container) return;
+
     const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.dataset.type = type;
     
     const colors = {
         success: '#27ae60',
@@ -100,6 +157,8 @@ function showToast(message, type = 'success') {
         info: 'ℹ'
     };
     
+    const duration = 3200;
+
     toast.style.cssText = `
         background: ${colors[type]};
         color: white;
@@ -114,11 +173,14 @@ function showToast(message, type = 'success') {
         animation: slideIn 0.3s ease;
         font-weight: 500;
         z-index: 10000;
+        position: relative;
+        overflow: hidden;
     `;
     
     toast.innerHTML = `
         <span style="font-size: 1.2rem;">${icons[type]}</span>
         <span>${message}</span>
+        <span class="toast-progress" style="animation-duration: ${duration}ms;"></span>
     `;
     
     container.appendChild(toast);
@@ -126,7 +188,7 @@ function showToast(message, type = 'success') {
     setTimeout(() => {
         toast.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, duration);
 }
 
 // FUNCIONES PARA LOGO
@@ -892,6 +954,8 @@ function removeFormato(index) {
 
 async function handleSpecialtySubmit(e) {
     e.preventDefault();
+    const form = e.target;
+    setFormLoadingState(form, true, 'Guardando...');
     const formData = new FormData(e.target);
     const id = formData.get('id');
     
@@ -920,6 +984,8 @@ async function handleSpecialtySubmit(e) {
         if (currentStudent) loadStudentSpecialtyResources();
     } catch (error) {
         showToast(error.message || 'No se pudo guardar la especialidad', 'error');
+    } finally {
+        setFormLoadingState(form, false);
     }
 }
 
@@ -937,9 +1003,12 @@ async function loadSpecialtiesSelectForMaterial() {
 
 async function handleMaterialUploadSubmit(e) {
     e.preventDefault();
+    const form = e.target;
+    setFormLoadingState(form, true, 'Subiendo...');
     const specialtyId = Number(document.getElementById('material-specialty-select').value);
     if (!specialtyId) {
         showToast('Selecciona una materia/especialidad', 'warning');
+        setFormLoadingState(form, false);
         return;
     }
 
@@ -959,6 +1028,8 @@ async function handleMaterialUploadSubmit(e) {
         showToast('Material cargado correctamente', 'success');
     } catch (error) {
         showToast(error.message || 'No se pudo cargar el material', 'error');
+    } finally {
+        setFormLoadingState(form, false);
     }
 }
 
@@ -1222,6 +1293,8 @@ function buscarHistorialAcademico() {
 // LOGIN FORMS
 async function handleStudentSubmit(e) {
     e.preventDefault();
+    const form = e.target;
+    setFormLoadingState(form, true, 'Guardando...');
     const formData = new FormData(e.target);
     const id = formData.get('id');
 
@@ -1256,11 +1329,15 @@ async function handleStudentSubmit(e) {
         showToast(id ? 'Alumno actualizado' : 'Alumno agregado', 'success');
     } catch (error) {
         showToast(error.message || 'No se pudo guardar el alumno', 'error');
+    } finally {
+        setFormLoadingState(form, false);
     }
 }
 
 async function handleTeacherSubmit(e) {
     e.preventDefault();
+    const form = e.target;
+    setFormLoadingState(form, true, 'Guardando...');
     const formData = new FormData(e.target);
     const id = formData.get('id');
 
@@ -1291,11 +1368,15 @@ async function handleTeacherSubmit(e) {
         showToast(id ? 'Docente actualizado' : 'Docente agregado', 'success');
     } catch (error) {
         showToast(error.message || 'No se pudo guardar el docente', 'error');
+    } finally {
+        setFormLoadingState(form, false);
     }
 }
 
 async function handleGradeSubmit(e) {
     e.preventDefault();
+    const form = e.target;
+    setFormLoadingState(form, true, 'Guardando...');
     const formData = new FormData(e.target);
 
     const payload = {
@@ -1318,11 +1399,15 @@ async function handleGradeSubmit(e) {
         showToast('Calificacion registrada', 'success');
     } catch (error) {
         showToast(error.message || 'No se pudo registrar la calificacion', 'error');
+    } finally {
+        setFormLoadingState(form, false);
     }
 }
 
 async function handleEventSubmit(e) {
     e.preventDefault();
+    const form = e.target;
+    setFormLoadingState(form, true, 'Guardando...');
     const formData = new FormData(e.target);
     const id = formData.get('id');
 
@@ -1358,14 +1443,19 @@ async function handleEventSubmit(e) {
         showToast(id ? 'Evento actualizado' : 'Evento creado', 'success');
     } catch (error) {
         showToast(error.message || 'No se pudo guardar el evento', 'error');
+    } finally {
+        setFormLoadingState(form, false);
     }
 }
 
 async function handleStudentAppointmentSubmit(e) {
     e.preventDefault();
+    const form = e.target;
+    setFormLoadingState(form, true, 'Agendando...');
     
     if (!currentStudent) {
         showToast('Error: No hay sesión de estudiante activa', 'error');
+        setFormLoadingState(form, false);
         return;
     }
     
@@ -1397,11 +1487,15 @@ async function handleStudentAppointmentSubmit(e) {
         showToast('Cita agendada correctamente', 'success');
     } catch (error) {
         showToast(error.message || 'No se pudo agendar la cita', 'error');
+    } finally {
+        setFormLoadingState(form, false);
     }
 }
 
 async function handleAppointmentSubmit(e) {
     e.preventDefault();
+    const form = e.target;
+    setFormLoadingState(form, true, 'Guardando...');
     
     const formData = new FormData(e.target);
     const id = formData.get('id');
@@ -1434,11 +1528,14 @@ async function handleAppointmentSubmit(e) {
         showToast(id ? 'Cita actualizada correctamente' : 'Cita agendada correctamente', 'success');
     } catch (error) {
         showToast(error.message || 'No se pudo guardar la cita', 'error');
+    } finally {
+        setFormLoadingState(form, false);
     }
 }
 
 document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    setFormLoadingState(e.target, true, 'Validando...');
 
     const formData = new FormData(e.target);
     const usuarioIngresado = (formData.get('usuario') || '').trim();
@@ -1446,6 +1543,7 @@ document.getElementById('admin-login-form').addEventListener('submit', async (e)
 
     if (usuarioIngresado !== 'Admin123' || passwordIngresado !== '1234') {
         showToast('Credenciales incorrectas', 'error');
+        setFormLoadingState(e.target, false);
         return;
     }
 
@@ -1478,11 +1576,14 @@ document.getElementById('admin-login-form').addEventListener('submit', async (e)
         showToast('Bienvenido ' + currentUser.nombre, 'success');
     } catch (error) {
         showToast(error.message || 'Credenciales incorrectas', 'error');
+    } finally {
+        setFormLoadingState(e.target, false);
     }
 });
 
 document.getElementById('student-login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    setFormLoadingState(e.target, true, 'Validando...');
     const formData = new FormData(e.target);
 
     const payload = {
@@ -1520,6 +1621,8 @@ document.getElementById('student-login-form').addEventListener('submit', async (
         showToast('Bienvenido ' + currentStudent.nombre, 'success');
     } catch (error) {
         showToast(error.message || 'Credenciales incorrectas', 'error');
+    } finally {
+        setFormLoadingState(e.target, false);
     }
 });
 
@@ -1534,15 +1637,18 @@ function logout() {
 
 // CARGA DE DATOS
 function loadAdminDashboard() {
-    document.getElementById('stat-students').textContent = demoData.students.length;
-    document.getElementById('stat-teachers').textContent = demoData.teachers.length;
-    document.getElementById('stat-events').textContent = demoData.events.length;
-    document.getElementById('stat-appointments').textContent = demoData.appointments.filter(a => a.estado === 'pendiente' || a.estado === 'espera').length;
+    animateCount(document.getElementById('stat-students'), demoData.students.length);
+    animateCount(document.getElementById('stat-teachers'), demoData.teachers.length);
+    animateCount(document.getElementById('stat-events'), demoData.events.length);
+    animateCount(
+        document.getElementById('stat-appointments'),
+        demoData.appointments.filter(a => a.estado === 'pendiente' || a.estado === 'espera').length
+    );
 }
 
 async function loadStudents() {
     const tbody = document.querySelector('#students-table tbody');
-    tbody.innerHTML = '';
+    renderTableSkeleton(tbody, 6);
 
     try {
         const response = await apiRequest('students.php');
@@ -1570,7 +1676,7 @@ async function loadStudents() {
 
 async function loadTeachers() {
     const tbody = document.querySelector('#teachers-table tbody');
-    tbody.innerHTML = '';
+    renderTableSkeleton(tbody, 5);
 
     try {
         const response = await apiRequest('teachers.php');
@@ -1597,7 +1703,7 @@ async function loadTeachers() {
 
 async function loadGrades() {
     const tbody = document.querySelector('#grades-table tbody');
-    tbody.innerHTML = '';
+    renderTableSkeleton(tbody, 6);
 
     try {
         const response = await apiRequest('grades.php');
@@ -1622,7 +1728,7 @@ async function loadGrades() {
 
 async function loadEvents() {
     const tbody = document.querySelector('#events-table tbody');
-    tbody.innerHTML = '';
+    renderTableSkeleton(tbody, 7);
 
     try {
         const response = await apiRequest('events.php');
@@ -1655,7 +1761,7 @@ async function loadEvents() {
 
 async function loadAppointments() {
     const tbody = document.querySelector('#appointments-table tbody');
-    tbody.innerHTML = '';
+    renderTableSkeleton(tbody, 6);
 
     try {
         const response = await apiRequest('appointments.php');
@@ -1696,7 +1802,7 @@ function getAppointmentStatusMeta(estado) {
 
 async function loadSpecialties() {
     const tbody = document.querySelector('#specialties-table tbody');
-    tbody.innerHTML = '';
+    renderTableSkeleton(tbody, 5);
 
     try {
         const response = await apiRequest('specialties.php');
@@ -2110,7 +2216,7 @@ function loadStudentGrades() {
     if (progressContainer) {
         progressContainer.innerHTML = loadAcademicProgress();
     }
-    tbody.innerHTML = '';
+    renderTableSkeleton(tbody, 5, 3);
     
     const studentGrades = demoData.grades.filter(g => g.numero_control === currentStudent.numero_control);
     
@@ -2159,7 +2265,7 @@ function loadStudentAppointments() {
     if (!currentStudent) return;
     
     const tbody = document.querySelector('#student-appointments-table tbody');
-    tbody.innerHTML = '';
+    renderTableSkeleton(tbody, 5, 3);
     
     const studentAppointments = demoData.appointments.filter(a =>
         (a.alumno_id && Number(a.alumno_id) === Number(currentStudent.id)) ||
